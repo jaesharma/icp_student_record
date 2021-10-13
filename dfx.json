@@ -1,0 +1,35 @@
+{
+  "canisters": {
+    "student_records": {
+      "main": "src/student_records/main.mo",
+      "type": "motoko"
+    },
+    "student_records_assets": {
+      "dependencies": [
+        "student_records"
+      ],
+      "frontend": {
+        "entrypoint": "src/student_records_assets/src/index.html"
+      },
+      "source": [
+        "src/student_records_assets/assets",
+        "dist/student_records_assets/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "dfx": "0.8.1",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  },
+  "version": 1
+}
