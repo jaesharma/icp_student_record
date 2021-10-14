@@ -1,0 +1,17 @@
+type Id = text;
+type Entry = 
+ record {
+   age: int;
+   name: text;
+   school: text;
+ };
+service : {
+  createEntry: (Id, Entry) -> ();
+  deleteEntry: (Id) -> ();
+  getEntries: () -> (vec record {
+                           text;
+                           Entry;
+                         });
+  lookup: (Id) -> (opt Entry);
+  updateEntry: (Id, Entry) -> ();
+}
