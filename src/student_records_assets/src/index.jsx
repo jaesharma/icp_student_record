@@ -24,7 +24,7 @@ const App = () => {
     setRecords();
   });
 
-  async function setRecords() {
+  const setRecords = async () => {
     const records = await student_records.getEntries();
     setState((state) => ({
       ...state,
@@ -35,21 +35,42 @@ const App = () => {
           ...record[1],
         })) || [],
     }));
-  }
+  };
 
-  async function create() {
-    const id = `${Math.random()}`;
-    const entry = {
-      name: "Jayesh",
-      age: 22,
-      school: "jyoti sr. sec. school",
-    };
-    await student_records.createEntry(id, entry);
-  }
+  const addNew = async (record) => {
+    setState((state) => ({
+      ...state,
+      records: [...state.records, record],
+    }));
+  };
+
+  const update = async (id, entry) => {
+    const index = state.records.findIndex((record) => record.id === id);
+    if (index === -1) return;
+    const updatedRecords = [...state.records];
+    updatedRecords[index] = entry;
+    setState((state) => ({
+      ...state,
+      records: updatedRecords,
+    }));
+  };
+
+  const deleteLocalRecord = async (id) => {
+    setState((state) => ({
+      ...state,
+      records: state.records.filter((record) => record.id !== id),
+    }));
+  };
 
   return (
     <div className={classes.container}>
-      <Content records={state.records} loading={state.loading} />
+      <Content
+        records={state.records}
+        loading={state.loading}
+        addNew={addNew}
+        update={update}
+        deleteLocalRecord={deleteLocalRecord}
+      />
     </div>
   );
 };

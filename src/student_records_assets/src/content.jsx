@@ -46,12 +46,16 @@ const useStyles = makeStyles((theme) => ({
     width: "65%",
     alignSelf: "center",
     justifyContent: "flex-start",
+    alignItems: "center",
     padding: "4px",
     border: "1px solid #aaa",
     transition: "all ease-in-out .3s",
     "&:hover": {
       background: "#aaa",
     },
+  },
+  editingRow: {
+    background: "#eee",
   },
   cell: {
     display: "flex",
@@ -88,6 +92,12 @@ const useStyles = makeStyles((theme) => ({
       color: "red",
     },
   },
+  done: {
+    fontSize: "1.3rem",
+    "&:hover": {
+      color: "green",
+    },
+  },
   closeIcon: {
     fontSize: "1.3rem",
     "&:hover": {
@@ -114,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Content = (props) => {
-  const { records, loading } = props;
+  const { records, loading, addNew, update, deleteLocalRecord } = props;
   const [state, setState] = useState({
     entryPopover: false,
     name: "",
@@ -123,6 +133,12 @@ const Content = (props) => {
     creatingEntry: false,
     deletingEntry: "",
     editingEntry: "",
+    updating: false,
+    editingState: {
+      name: "",
+      age: "",
+      school: "",
+    },
   });
   const classes = useStyles();
   const createEntry = async (event) => {
@@ -138,6 +154,7 @@ const Content = (props) => {
       school,
     };
     await student_records.createEntry(id, entry);
+    addNew({ id, name, age, school });
     togglePopover();
   };
   const togglePopover = (event) => {
@@ -168,21 +185,75 @@ const Content = (props) => {
       deletingEntry: id,
     }));
     await student_records.deleteEntry(id);
+    deleteLocalRecord(id);
     setState((state) => ({
       ...state,
       deletingEntry: "",
     }));
   };
-  const editEntry = async (id) => {
+  const editEntry = async (id, index) => {
     setState((state) => ({
       ...state,
       editingEntry: id,
+      updating: false,
+      editingState: {
+        name: records[index - 1]?.name || "",
+        age: `${records[index - 1]?.age || ""}`,
+        school: records[index - 1]?.school || "",
+      },
     }));
   };
   const cancelEditing = () => {
     setState((state) => ({
       ...state,
+      updating: false,
       editingEntry: "",
+      editingState: {
+        name: "",
+        age: "",
+        school: "",
+      },
+    }));
+  };
+  const updateEntry = async () => {
+    const { name, age, school } = state.editingState;
+    setState((state) => ({
+      ...state,
+      updating: true,
+    }));
+    const entry = {
+      name,
+      age: parseInt(age),
+      school,
+    };
+    const id = state.editingEntry;
+    await student_records.updateEntry(id, entry);
+    update(id, { id, name, age, school });
+    setState((state) => ({
+      ...state,
+      editingEntry: "",
+      editingState: {
+        name: "",
+        age: "",
+        school: "",
+      },
+      updating: false,
+    }));
+  };
+
+  const handleEditingStateChange = (event) => {
+    const value = event.target.value;
+    const name = event.target.name;
+    if (value && name === "age") {
+      let isInt = /^\d+$/.test(value);
+      if (!isInt) return;
+    }
+    setState((state) => ({
+      ...state,
+      editingState: {
+        ...state.editingState,
+        [name]: value,
+      },
     }));
   };
   return (
@@ -234,7 +305,11 @@ const Content = (props) => {
                 deletingEntry={state.deletingEntry}
                 editEntry={editEntry}
                 editingEntry={state.editingEntry}
+                updating={state.updating}
                 cancelEditing={cancelEditing}
+                updateEntry={updateEntry}
+                editingState={state.editingState}
+                handleEditingStateChange={handleEditingStateChange}
               />
             ))}
           </Fragment>
